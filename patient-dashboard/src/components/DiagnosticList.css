@@ -1,0 +1,35 @@
+.diagnostic-list-section {
+  padding: 20px;
+}
+
+.diagnostic-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.diagnostic-table th,
+.diagnostic-table td {
+  text-align: left;
+  padding: 8px;
+}
+
+.diagnostic-table tbody tr:nth-child(even) {
+  background: var(--unnamed-color-f6f6f6, #f6f6f6);
+}
+
+.under-observation {
+  color: var(--unnamed-color-ff6200, #ff6200);
+}
+
+.cured {
+  color: var(--unnamed-color-0bd984, #0bd984);
+}
+
+.inactive {
+  color: var(--unnamed-color-707070, #707070);
+}
+
+.untreated {
+  color: #d00;
+}

@@ -1,0 +1,9 @@
+.patient-details {
+  width: 280px;
+  padding: 20px;
+  border-left: 1px solid #eee;
+}
+
+.patient-details > * + * {
+  margin-top: 20px;
+}
