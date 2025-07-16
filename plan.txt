@@ -1,0 +1,943 @@
+Great. I’ll create a detailed step-by-step implementation plan for converting the Adobe XD design into a local, single-page HTML/CSS/JS/React app using the Coalition Technologies API, with clear file/folder structure, component instructions, API integration steps, and a thorough README template.
+
+This guide will use all resources you provided, and it will be written in a way that even someone unfamiliar with the tech stack can follow it from start to finish.
+I’ll let you know once the complete plan is ready.
+
+
+# Building the Coalition Technologies Patient Dashboard (FED API Skills Test) – Step-by-Step Guide
+
+**Overview:**
+In this guide, we will build a single-page **React** application that replicates the **Tech.Care Patient Dashboard** as given in the Adobe XD design template. The dashboard will display **Jessica Taylor**’s patient information and health data, including a blood pressure chart, using data fetched from the Coalition Technologies Patient Data API. We’ll use only **HTML, CSS, JavaScript, and React** (no additional frameworks) and ensure the project runs fully offline as a local app (no deployment needed). All design elements (layout, styling, colors, typography) will follow the provided mockup and CSS theme. The guide is written for a novice developer, with detailed step-by-step instructions, code examples, and explanations.
+
+## 1. Initialize the React Project Environment
+
+First, set up a new React project. We’ll use **Create React App** for simplicity:
+
+1. **Ensure Node and npm are installed:** You need Node.js and npm on your machine. Verify by running `node -v` and `npm -v` in your terminal.
+2. **Create a new app:** In your terminal, run:
+
+   ```bash
+   npx create-react-app patient-dashboard
+   ```
+
+   This will generate a React project in a folder named `patient-dashboard` with a default structure.
+3. **Navigate into the project directory:**
+
+   ```bash
+   cd patient-dashboard
+   ```
+4. **Start the development server:**
+
+   ```bash
+   npm start
+   ```
+
+   This runs the app in development mode. Open [http://localhost:3000](http://localhost:3000) in your browser to verify it's working. You should see the default CRA homepage.
+
+**Cleanup Initial Files:** The default project includes some boilerplate files we won’t need (like the React logo, default CSS, tests, etc.). You can delete or ignore them for now:
+
+* In `/src`: remove `App.test.js`, `logo.svg`, and service worker or reportWebVitals if present. We will create our own components and styles.
+* Clear out `App.css` and `App.js` to prepare for our custom code.
+
+## 2. Install Required Dependencies and Assets
+
+Next, install any libraries and assets we need for the project:
+
+* **Chart.js:** We will use Chart.js for the blood pressure graph. Install it via npm:
+
+  ```bash
+  npm install chart.js
+  ```
+
+  (We will integrate it directly in our React component using its API.)
+* **React Icons (optional but recommended):** The dashboard design includes various icons (for phone, gender, download arrows, etc.). To easily include icons, install the React Icons library:
+
+  ```bash
+  npm install react-icons
+  ```
+
+  This provides a large set of icons (FontAwesome, Material, etc.) we can use in JSX as components.
+* **CSS Theme:** The styling is provided in a CSS file named **“2024 FED API Skills Test.css”** (your design theme). Add this file to the project (e.g., place it in `src/` or `src/assets/`). We will import it later to apply the styles. This CSS defines custom properties (colors, fonts) and utility classes for typography that we’ll use (like `.card-title-24pt`, `.inner-card-title-18pt`, etc.).
+* **Fonts:** The CSS references the **Manrope** font family. We need to include this font in our project. The easiest way is to add a Google Fonts link in the HTML. Open the file `public/index.html` and add within the `<head>` section:
+
+  ```html
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet" />
+  ```
+
+  This imports Manrope with normal, bold, and extra-bold weights (400, 700, 800) as used by the theme.
+
+At this point, your project has React set up and the necessary libraries installed. We can now plan the project structure and start building components.
+
+## 3. Plan the Project Structure and Components
+
+For clarity and maintainability, we will break the UI into reusable React components. According to the design, the page has the following sections:
+
+* **Top Navigation Bar:** A header with the app name/logo and a navigation menu (Overview, Patients, etc.), and a user profile info at right.
+* **Left Sidebar (Patients List):** A vertical list of patient names (with a small avatar and age/gender info). In our project, this will be mostly static since we only display Jessica’s data, but we’ll include other names for realism. (No dynamic switching needed – clicking other patients is not required per instructions.)
+* **Center Panel:** This contains:
+
+  * *Diagnosis History* section – which includes a **“Blood Pressure (Last 6 months)”** card with a line chart and current systolic/diastolic values, and a set of smaller cards for other vitals (heart rate, respiratory rate, temperature).
+  * *Diagnostic List* section – a list/table of the patient’s diagnoses with descriptions and status.
+* **Right Sidebar (Patient Details):** This contains Jessica Taylor’s personal info (photo, DOB, contact, insurance, etc.) and a *Lab Results* section listing her lab result documents.
+
+We will create a separate component for each major part. Below is a suggested folder/file structure under `src/`:
+
+```plaintext
+src/
+  components/
+    Navbar.js             – Top navigation bar
+    PatientsSidebar.js    – Left sidebar list of patients
+    DiagnosisHistory.js   – Center panel section for chart + vitals
+    DiagnosticList.js     – Center panel section for diagnosis list/table
+    PatientDetails.js     – Right sidebar container (patient info + labs)
+    PatientInfoCard.js    – (Sub-component) Patient info card (photo and personal details)
+    LabResults.js         – (Sub-component) Lab results list
+    BloodPressureChart.js – (Sub-component) for Chart.js graph
+  App.js       – Main layout combining the components
+  index.js     – React entry (will render <App />)
+  2024 FED API Skills Test.css – (CSS theme file)
+  index.css    – Global styles (optional; we can also use theme CSS directly)
+```
+
+Each component will correspond to a UI section. We use **PascalCase** naming for React components (e.g., `PatientsSidebar`). Now let's build each part step by step.
+
+## 4. Set Up the Basic Layout in App.js
+
+Open `src/App.js`. Here we will import our components and arrange the overall layout. We’ll use a flexible layout with CSS to position the sidebar, center, and right panel.
+
+**Layout Structure:**
+We will render the Navbar at the top, and below it a container for the three columns (sidebar, center, right). For simplicity, we can use a CSS Flexbox or CSS Grid. Here, we’ll use Flexbox:
+
+* A wrapper `<div>` (class “dashboard-container”) that holds:
+
+  * `<PatientsSidebar />` (the left column)
+  * A `<main>` element for the center content (diagnosis history & list)
+  * `<PatientDetails />` (the right column)
+
+In code, `App.js` might look like this (pseudo-code for structure):
+
+```jsx
+import React from 'react';
+import Navbar from './components/Navbar';
+import PatientsSidebar from './components/PatientsSidebar';
+import DiagnosisHistory from './components/DiagnosisHistory';
+import DiagnosticList from './components/DiagnosticList';
+import PatientDetails from './components/PatientDetails';
+import './2024 FED API Skills Test.css';  // Import the theme CSS globally
+
+function App() {
+  return (
+    <div className="App">
+      <Navbar />
+      {/* Main content area with 3 columns */}
+      <div className="dashboard-container">
+        <PatientsSidebar />
+        <main className="center-panel">
+          <DiagnosisHistory />
+          <DiagnosticList />
+        </main>
+        <PatientDetails />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+We will define CSS for `.dashboard-container` and the column classes to ensure proper sizing and spacing:
+
+* For example, in `index.css` (or a `<style>` in App.js), you can add:
+
+  ```css
+  .dashboard-container {
+    display: flex;
+    flex-direction: row;
+    background-color: var(--unnamed-color-f6f6f6); /* light gray page background */
+  }
+  .center-panel {
+    flex: 1;               /* take remaining width */
+    padding: 20px;         /* some padding around content */
+  }
+  ```
+
+  And we might give the sidebars fixed widths:
+
+  ```css
+  .patients-sidebar {
+    width: 250px;
+    background: var(--unnamed-color-f6f6f6);
+  }
+  .patient-details {
+    width: 300px;
+    background: var(--unnamed-color-f6f6f6);
+    padding: 20px;
+  }
+  ```
+
+  (These values can be adjusted to match the design proportions; the design shows a narrow left list and a slightly wider right panel.)
+
+*Note:* We use the CSS variables from the theme for colors (e.g., `--unnamed-color-f6f6f6` for the light grey background). The theme CSS is imported so these variables and text style classes are available across our app.
+
+With the basic layout in place, let’s implement each component one by one.
+
+## 5. Build the Navbar (Top Navigation Bar)
+
+Create `src/components/Navbar.js`. This will contain the top bar with:
+
+* **Logo / App Name:** The left side might show a logo image or text “Tech.Care”. If an official logo image is provided, include it in `public/` and use an `<img>` tag. Otherwise, use a text placeholder.
+* **Navigation Menu:** Items like “Overview”, “Patients”, “Schedule”, “Messages”, “Settings” (the exact labels from the Adobe XD template). We know “Patients” is the active section (since we are on the Patients dashboard). We’ll display these as a horizontal list.
+* **User Profile Info:** On the right, the design shows the logged-in doctor’s name (e.g., *Dr. Jose Simmons – General Practitioner*) with a small avatar. We can hardcode this info (it’s just part of the UI chrome).
+
+Structure the Navbar with a `<header>` or `<nav>` element containing left, center, and right parts:
+
+* Use a container `<div className="navbar">` and inside:
+
+  * `<div className="logo">Tech.Care</div>` (or image logo)
+  * `<ul className="menu">` with menu `<li>` items for each section. Mark “Patients” as active.
+  * `<div className="profile">Dr. Jose Simmons<br/><span>General Practitioner</span> <img src="profile.jpg" .../></div>` (including an avatar if available; else use a placeholder circle or icon from **react-icons**).
+
+Apply styling:
+
+* Use theme text classes for typography: The menu items can use `.body-regular-14` (14px, normal weight) or `.body-emphasized-14pt` if needing bold. The active menu item (Patients) might be highlighted in the theme’s accent color (teal) with maybe an underline. You can create a class `.active` for the active menu item and use the provided accent color variables: e.g.
+
+  ```css
+  .menu li.active { 
+    color: var(--unnamed-color-006aac); /* a blue shade from theme */ 
+    border-bottom: 2px solid var(--activestate_bg_1); /* active indicator */ 
+  }
+  ```
+
+  *(Here `--activestate_bg_1` is a bright teal used for active states.)*
+* Align items with CSS flex or grid: The navbar can be `display: flex; justify-content: space-between; align-items: center; padding: 0 20px; background: #fff;` etc. Ensure it spans full width.
+
+After implementing, the Navbar should visually match the top bar of the design with correct titles and active highlight on "Patients".
+
+## 6. Build the Patients Sidebar (Left Panel)
+
+Create `src/components/PatientsSidebar.js`. This component displays the list of patients on the left.
+
+**Data for Patients List:** The API returns an array of multiple patients (Jessica Taylor plus others). For design completeness, we will list all patients’ names from the data with Jessica highlighted. However, since the test only requires showing Jessica’s info, we won’t implement clicking or switching logic (other patients’ data is not displayed on click). We’ll simply show the list and mark Jessica as the selected one.
+
+We’ll fetch the actual data via the API later (in a parent component) and pass it down. For now, design the structure:
+
+* A container `<aside className="patients-sidebar">` (we gave it a fixed width in CSS).
+* Optionally a header “Patients” at the top of this panel (could use an `<h2>` or just rely on the nav’s “Patients” label).
+* A list of patient items. Use an unordered list `<ul>` or just a series of `<div>`s:
+  Each patient item should include:
+
+  * Possibly a small thumbnail image (profile picture).
+  * The patient’s name.
+  * The patient’s gender and age.
+
+For example, one item could be:
+
+```jsx
+<div className={`patient-item ${isSelected ? 'active' : ''}`}>
+  <img src={patient.profile_picture} alt={patient.name} className="avatar" />
+  <div>
+    <div className="patient-name inner-card-title-18pt">{patient.name}</div>
+    <div className="patient-meta body-secondary-info-14pt">
+      {patient.gender}, {patient.age}
+    </div>
+  </div>
+</div>
+```
+
+We use the theme’s `.inner-card-title-18pt` class for the name (18px, bold titlecase), and `.body-secondary-info-14pt` for the smaller grey text of gender/age. The `active` class (we define in our CSS) will highlight Jessica’s item. For example:
+
+```css
+.patient-item.active {
+  background: var(--activestate_bg_2);        /* light highlight background, e.g. light teal */ 
+  border-left: 4px solid var(--activestate_bg_1); /* colored stripe on left */
+}
+```
+
+In the theme, `--activestate_bg_2` is a light cyan (#D8FCF7) and `--activestate_bg_1` is bright teal (#01F0D0). Using these gives a nice accent to the selected patient.
+
+Style the list: remove default UL styling if using `<ul>`, and make the items stack vertically. Add some padding and maybe a hover effect on items:
+
+```css
+.patient-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+.patient-item img.avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.patient-item:hover { background: var(--unnamed-color-ededed); }
+```
+
+*(We use `--unnamed-color-ededed` (#EDEDED) for hover background – a light grey from theme.)*
+
+**Passing Data:** In the final app, `PatientsSidebar` will receive a list of patients and the selected patient’s ID or name as props. For example:
+
+```jsx
+<PatientsSidebar patients={patients} selectedName="Jessica Taylor" />
+```
+
+Then inside, map through `patients` to render each item, setting `isSelected = (patient.name === selectedName)`.
+
+We’ll integrate this once we handle data fetching. Now, let’s create the main center panel components.
+
+## 7. Build the Diagnosis History Section (Center Panel Top)
+
+Create `src/components/DiagnosisHistory.js`. This component shows the **“Diagnosis History”** heading, the **Blood Pressure** chart card, and the three small vital cards (Heart Rate, Respiratory Rate, Temperature). We will split some parts into sub-components for clarity:
+
+* **Section Heading:** “Diagnosis History” – use an `<h2>` or `<div>` with class `.card-title-24pt` (24px extra-bold) to style it.
+* **Blood Pressure Card:** This will contain:
+
+  * A subtitle like “Blood Pressure – Last 6 months”.
+  * A line chart (rendered via Chart.js).
+  * The latest **Systolic** and **Diastolic** readings displayed numerically with their level indicators (e.g., “160” with label *Higher than Average*, “78” with *Lower than Average*).
+* **Vitals Cards:** Three small cards for **Heart Rate**, **Respiratory Rate**, **Temperature**, showing the latest values and their status.
+
+Let’s break it down:
+
+**7.1 Blood Pressure Chart Card:**
+We’ll create a sub-component for the chart named `BloodPressureChart.js` to encapsulate Chart.js usage. In `DiagnosisHistory.js`, we will import and use `<BloodPressureChart systolicData={...} diastolicData={...} />` passing the data extracted from Jessica’s records.
+
+Structure for BloodPressureChart:
+
+```jsx
+import { useEffect, useRef } from 'react';
+import Chart from 'chart.js/auto';
+
+function BloodPressureChart({ labels, systolicData, diastolicData }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const ctx = canvasRef.current.getContext('2d');
+    // Create Chart.js line chart
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels, // e.g. ["Oct 2023","Nov 2023",...,"Mar 2024"]
+        datasets: [
+          {
+            label: 'Systolic',
+            data: systolicData, // e.g. [135, 140, ... 160]
+            borderColor: '#705AAA',       // purple line color (from theme) 
+            backgroundColor: '#705AAA33', // translucent fill (optional)
+            tension: 0.4,                 // smoothing
+          },
+          {
+            label: 'Diastolic',
+            data: diastolicData, // e.g. [80, 82, ... 78]
+            borderColor: '#0BD984',       // green line color (from theme)
+            backgroundColor: '#0BD98433',
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        plugins: { legend: false }, // hide legend if not needed (design doesn’t show it)
+        scales: {
+          y: { beginAtZero: false, suggestedMin: 60, suggestedMax: 170 },
+        }
+      }
+    });
+  }, [labels, systolicData, diastolicData]);
+  
+  return <canvas ref={canvasRef} width={400} height={200}></canvas>;
+}
+
+export default BloodPressureChart;
+```
+
+In the above code:
+
+* We use `Chart.js` by importing `chart.js/auto` which auto-registers necessary chart components.
+* We take `labels`, `systolicData`, and `diastolicData` as props (these will be arrays prepared from the patient’s diagnosis history).
+* We create a new `Chart` in a `useEffect` hook when the component mounts or when data changes.
+* We styled the chart lines with colors chosen from the theme variables: here I used `#705AAA` (a purple) and `#0BD984` (a teal-green) for the lines – these correspond to theme colors. You can adjust colors to match the mockup (the design chart lines were likely distinct colors).
+* We turned off the legend and adjusted y-axis range for better presentation. This can be tweaked as needed.
+* The canvas width/height can be set via props or CSS as well.
+
+Now, in `DiagnosisHistory.js`, use this chart component. Also display the numeric readings:
+
+```jsx
+import BloodPressureChart from './BloodPressureChart';
+
+function DiagnosisHistory({ diagnosisHistory }) {
+  // Get the last 6 records (or fewer if not available)
+  const recentHistory = diagnosisHistory.slice(-6);
+  const labels = recentHistory.map(item => `${item.month} ${item.year}`); // e.g. "Oct 2023"
+  const systolicData = recentHistory.map(item => item.blood_pressure.systolic.value);
+  const diastolicData = recentHistory.map(item => item.blood_pressure.diastolic.value);
+  // Latest (last entry) for current values:
+  const latest = recentHistory[recentHistory.length - 1];
+
+  return (
+    <section className="diagnosis-history-section">
+      <h2 className="card-title-24pt">Diagnosis History</h2>
+      {/* Blood Pressure Card */}
+      <div className="blood-pressure-card">
+        <div className="blood-pressure-header">
+          <span className="inner-card-title-18pt">Blood Pressure</span>
+          <span className="body-secondary-info-14pt">Last 6 months</span>
+        </div>
+        <BloodPressureChart labels={labels} systolicData={systolicData} diastolicData={diastolicData} />
+        <div className="blood-pressure-readings">
+          {/* Systolic and Diastolic current readings */}
+          <div className="reading">
+            <div className="body-secondary-info-14pt">Systolic</div>
+            <div className="card-title-24pt">{latest.blood_pressure.systolic.value}</div>
+            <div className="body-secondary-info-14pt">
+              {/* Arrow icon indicating level */}
+              {latest.blood_pressure.systolic.levels}
+            </div>
+          </div>
+          <div className="reading">
+            <div className="body-secondary-info-14pt">Diastolic</div>
+            <div className="card-title-24pt">{latest.blood_pressure.diastolic.value}</div>
+            <div className="body-secondary-info-14pt">
+              {latest.blood_pressure.diastolic.levels}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Vital Signs Cards */}
+      <div className="vitals-cards">
+        <div className="vital-card">
+          <div className="body-secondary-info-14pt">Respiratory Rate</div>
+          <div className="inner-card-title-18pt">{latest.respiratory_rate.value} bpm</div>
+          <div className="body-secondary-info-14pt">{latest.respiratory_rate.levels}</div>
+        </div>
+        <div className="vital-card">
+          <div className="body-secondary-info-14pt">Temperature</div>
+          <div className="inner-card-title-18pt">{latest.temperature.value}°F</div>
+          <div className="body-secondary-info-14pt">{latest.temperature.levels}</div>
+        </div>
+        <div className="vital-card">
+          <div className="body-secondary-info-14pt">Heart Rate</div>
+          <div className="inner-card-title-18pt">{latest.heart_rate.value} bpm</div>
+          <div className="body-secondary-info-14pt">{latest.heart_rate.levels}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default DiagnosisHistory;
+```
+
+In this JSX:
+
+* We use the theme classes for styling text:
+
+  * Section title uses `.card-title-24pt` (large, dark).
+  * “Blood Pressure” label uses `.inner-card-title-18pt` (medium, bold), and “Last 6 months” uses `.body-secondary-info-14pt` (small grey).
+  * For the readings, I used `.body-secondary-info-14pt` for labels like "Systolic" and the level text (e.g., “Higher than Average”), and used a larger font for the numeric value – I temporarily used `.card-title-24pt` for the number to make it stand out. You could also define a specific larger style if needed. The design shows those numbers quite large (likely larger than 24px actually). If needed, adjust the CSS to increase font-size for these or use inline style.
+* The vital sign mini-cards each show label (grey small), value (18pt bold) and status (grey small).
+* We haven’t included icons yet. In the design, each vital card likely has an icon (lungs for respiratory, thermometer for temperature, heart for heart rate). We can incorporate icons from **react-icons**:
+
+  * Import relevant icons at top, e.g. `import { FaHeart } from 'react-icons/fa'; import { GiLungs } from 'react-icons/gi'; import { WiThermometer } from 'react-icons/wi';` (or any icons of your choice representing these).
+  * Then include them in the JSX, perhaps as part of the label or as a background image. For example:
+
+    ```jsx
+    <div className="vital-card">
+      <div className="vital-icon heart"><FaHeart /></div>
+      <div>
+        <div className="body-secondary-info-14pt">Heart Rate</div>
+        <div className="inner-card-title-18pt">{latest.heart_rate.value} bpm</div>
+        <div className="body-secondary-info-14pt">{latest.heart_rate.levels}</div>
+      </div>
+    </div>
+    ```
+
+    And style `.vital-icon.heart` to have a colored background circle (perhaps use a pink/red color for heart icon background, a blue for respiratory, etc., according to design). The theme provides some colors (like `#FF6200` orange, `#0BD984` green) which you can use for icon backgrounds or status indicators.
+
+Apply CSS to `DiagnosisHistory` components:
+
+* `.blood-pressure-card` could be a styled card container (background white, padding, border-radius if any).
+* `.blood-pressure-header` to space the title and timeframe text (e.g., `display: flex; justify-content: space-between; align-items: baseline;`).
+* `.blood-pressure-readings` to layout the systolic/diastolic readings side by side. Possibly use a horizontal rule or divider between them if needed (the design shows a divider between Systolic and Diastolic). You can add a simple vertical separator: e.g.,
+
+  ```css
+  .blood-pressure-readings {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-top: 1px solid var(--unnamed-color-ededed);
+    margin-top: 10px;
+  }
+  .reading { text-align: center; }
+  ```
+* `.vitals-cards` to display the three cards in a row or grid. The design likely places them side by side (3 columns under the chart). If space is limited, they might wrap. A simple approach:
+
+  ```css
+  .vitals-cards {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  .vital-card {
+    flex: 1;
+    background: var(--unnamed-color-f6f6f6);
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  ```
+
+  Use a light grey background for these small cards (or white if that’s closer to design – the screenshot shows colored icon circles on a light card). You can refine the styling as needed.
+
+This completes the Diagnosis History section. Now, below this in the center panel comes the diagnostic list.
+
+## 8. Build the Diagnostic List Section (Center Panel Bottom)
+
+Create `src/components/DiagnosticList.js`. This will render the **“Diagnostic List”** heading and a list/table of the patient’s diagnoses.
+
+**Structure:** The design shows this as a table with columns **Problem/Diagnosis**, **Description**, **Status**. Each row is one diagnosis record from the API’s `diagnostic_list` array.
+
+We will:
+
+* Display a section heading “Diagnostic List” (use class `.card-title-24pt` for consistency).
+* Then either a `<table>` or simply a flex list of items. For simplicity, we can just use a table in JSX (with `<thead>` for column labels and `<tbody>` for rows). Alternatively, use a div structure for each row if you prefer responsive design; but a table here is straightforward.
+
+Example using a table:
+
+```jsx
+function DiagnosticList({ diagnosticList }) {
+  return (
+    <section className="diagnostic-list-section">
+      <h2 className="card-title-24pt">Diagnostic List</h2>
+      <table className="diagnostic-table">
+        <thead>
+          <tr className="body-secondary-info-14pt">
+            <th>Problem/Diagnosis</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {diagnosticList.map((item, idx) => (
+            <tr key={idx} className="body-regular-14">
+              <td>{item.name}</td>
+              <td>{item.description}</td>
+              <td>
+                {item.status}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+```
+
+In this code:
+
+* We use `.body-secondary-info-14pt` for the header row to style it slightly different (grey text).
+* Each row uses `.body-regular-14` class (normal 14px text). We could also use `.body-emphasized-14pt` for slightly bolder text if desired, but normal is fine for readability.
+* We map through the `diagnosticList` array of objects, displaying `name`, `description`, and `status` in columns.
+
+**Styling:**
+
+* Add CSS for the table to make it clean:
+
+  ```css
+  .diagnostic-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  .diagnostic-table th, .diagnostic-table td {
+    text-align: left;
+    padding: 8px;
+  }
+  .diagnostic-table th {
+    font-weight: normal; /* (the class already sets color to grey) */
+  }
+  .diagnostic-table tbody tr:nth-child(even) {
+    background: var(--unnamed-color-f6f6f6); /* alternating row background for clarity */
+  }
+  ```
+* If you want to mimic the design exactly, you might not need alternating row colors, but it can improve readability. The design likely had subtle separators or backgrounds.
+
+**Status Indicators:** As an optional enhancement, you can style the status text differently based on value (e.g., “Under Observation” in orange, “Cured” in green, etc.). The instructions mention that data may not exactly match the design and that’s fine, but if desired:
+
+* You could create a small colored dot or badge next to the status text. For example, a green dot for “Cured”, orange for “Under Observation”, grey for “Inactive”, red/orange for “Untreated”. You can use CSS `::before` pseudo-element or an icon from react-icons (like FaCircle) with colored style.
+* For simplicity, just styling the text color can suffice. E.g., in the JSX:
+
+  ```jsx
+  <td className={item.status.replace(" ", "-").toLowerCase()}>
+    {item.status}
+  </td>
+  ```
+
+  and CSS:
+
+  ```css
+  .under-observation { color: var(--unnamed-color-ff6200); } /* orange for Under Observation */
+  .cured { color: var(--unnamed-color-0bd984); }             /* green for Cured */
+  .inactive { color: var(--unnamed-color-707070); }          /* grey for Inactive */
+  .untreated { color: #d00; } /* a red color (not in theme, using custom) */
+  ```
+
+  This gives a visual cue consistent with how a status might be indicated.
+
+Now we’ve built the entire center panel. Finally, we construct the right panel with patient details.
+
+## 9. Build the Patient Details Panel (Right Sidebar)
+
+Create `src/components/PatientDetails.js`. This will act as a container for Jessica’s personal info card and the lab results list.
+
+Structure:
+
+```jsx
+import PatientInfoCard from './PatientInfoCard';
+import LabResults from './LabResults';
+
+function PatientDetails({ patient }) {
+  if (!patient) return null; // in case data hasn't loaded yet
+  return (
+    <aside className="patient-details">
+      <PatientInfoCard patient={patient} />
+      <LabResults labResults={patient.lab_results} />
+    </aside>
+  );
+}
+export default PatientDetails;
+```
+
+We pass the `patient` object (Jessica) as a prop. The component simply renders two sub-components: one for the info card and one for the lab results section.
+
+### 9.1 Patient Info Card
+
+Create `src/components/PatientInfoCard.js`. This displays Jessica’s name, photo, and details (DOB, Gender, Contact, Emergency Contact, Insurance). Use the data fields from the API:
+
+From the API JSON, Jessica’s object has:
+
+* `profile_picture` (URL to her photo)
+* `name`
+* `date_of_birth`
+* `gender`
+* `phone_number`
+* `emergency_contact`
+* `insurance_type`
+
+We will display these in a card format.
+
+```jsx
+import React from 'react';
+import { FaPhone, FaUserFriends } from 'react-icons/fa'; 
+import { MdDateRange } from 'react-icons/md'; 
+import { AiFillInsuranceCircle } from 'react-icons/ai'; 
+// (Above are example icons for DOB, phone, emergency contact, insurance. You can choose appropriate ones.)
+
+function PatientInfoCard({ patient }) {
+  return (
+    <div className="patient-info-card">
+      {/* Patient Photo and Name */}
+      <div className="patient-photo">
+        <img src={patient.profile_picture} alt={patient.name} />
+      </div>
+      <h2 className="card-title-24pt">{patient.name}</h2>
+      {/* Info Fields */}
+      <div className="info-field">
+        <MdDateRange className="info-icon" />
+        <span className="body-secondary-info-14pt">Date of Birth:</span>
+        <span className="body-emphasized-14pt">{new Date(patient.date_of_birth).toLocaleDateString()}</span>
+      </div>
+      <div className="info-field">
+        {/* Could use a gender icon or user icon */}
+        <FaUserFriends className="info-icon" />
+        <span className="body-secondary-info-14pt">Gender:</span>
+        <span className="body-emphasized-14pt">{patient.gender}</span>
+      </div>
+      <div className="info-field">
+        <FaPhone className="info-icon" />
+        <span className="body-secondary-info-14pt">Contact Info:</span>
+        <span className="body-emphasized-14pt">{patient.phone_number}</span>
+      </div>
+      <div className="info-field">
+        <FaPhone className="info-icon" style={{ transform: 'rotate(90deg)' }} />
+        <span className="body-secondary-info-14pt">Emergency Contact:</span>
+        <span className="body-emphasized-14pt">{patient.emergency_contact}</span>
+      </div>
+      <div className="info-field">
+        <AiFillInsuranceCircle className="info-icon" />
+        <span className="body-secondary-info-14pt">Insurance Provider:</span>
+        <span className="body-emphasized-14pt">{patient.insurance_type}</span>
+      </div>
+      {/* Optionally: a "Show All Information" link if there were more details to reveal */}
+      <div className="show-more body-secondary-info-14pt" style={{ color: 'var(--unnamed-color-ff6200)', cursor: 'pointer' }}>
+        Show All Information
+      </div>
+    </div>
+  );
+}
+export default PatientInfoCard;
+```
+
+Explanation:
+
+* We display the patient’s photo at the top. The design likely shows a circular profile picture. We can style the `<img>` with a circle: `border-radius: 50%; width: 80px; height: 80px; object-fit: cover;`.
+* The patient’s name is shown as a heading, using `.card-title-24pt` for a large bold text.
+* For each info field, we use an icon followed by a label and the value. We use `.body-secondary-info-14pt` for labels (small grey text) and `.body-emphasized-14pt` for the actual data (bold 14px). This makes the label slightly less prominent than the data.
+* Icons: We chose some from react-icons (you can choose others as needed). For emergency contact, we reused a phone icon but rotated it to suggest an alternate contact; you might use a group icon or alert icon instead.
+* “Show All Information”: The design snippet included a link text for additional info. We include it as a non-functional text (since we have no more info to show in this test). We style it orange (using `--unnamed-color-ff6200`, the theme’s orange) and make it look clickable. This is mostly for completeness with the mockup.
+
+Styling `PatientInfoCard`:
+
+```css
+.patient-info-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: left;
+}
+.patient-info-card .patient-photo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.patient-info-card .patient-photo img {
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+}
+.patient-info-card h2 {
+  margin: 0 0 10px;
+}
+.info-field {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+}
+.info-field .info-icon {
+  margin-right: 8px;
+  color: var(--unnamed-color-055a92); /* a dark blue for icons, or any appropriate color */
+}
+.info-field span {
+  margin-right: 5px;
+}
+```
+
+We give the card a white background and some padding. Each info-field is a flex row with a small gap.
+
+### 9.2 Lab Results List
+
+Create `src/components/LabResults.js`. This lists the patient’s lab results (documents). The API provides an array `lab_results` which contains strings like `"Blood Tests"`, `"CT Scans"`, etc.. We will display these as a list with a heading.
+
+```jsx
+import { FaDownload } from 'react-icons/fa';
+
+function LabResults({ labResults }) {
+  return (
+    <section className="lab-results-section">
+      <h2 className="card-title-24pt">Lab Results</h2>
+      <ul className="lab-results-list">
+        {labResults.map((item, idx) => (
+          <li key={idx} className="body-regular-14">
+            {item} 
+            <FaDownload className="download-icon" />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+export default LabResults;
+```
+
+We loop through `labResults` and create a list item for each. We include a download icon (using react-icons) after the text to indicate these could be downloaded. In the design, it shows a small icon to the right of each item (likely a download arrow or document icon). We simulate that with `<FaDownload>`.
+
+Styling:
+
+```css
+.lab-results-list {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 0;
+}
+.lab-results-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+}
+.download-icon {
+  color: var(--unnamed-color-007bc7); /* using a blue from theme for icon */
+}
+```
+
+We remove default bullets and use a flexible layout to put the text on the left and the icon on the right of each list item. Each item is styled as a small white card with a bit of padding and spacing between them.
+
+That covers the lab results section.
+
+## 10. Fetching Data from the API and Connecting Everything
+
+Now that our components are created, we need to fetch Jessica’s data from the API and pass it into these components. We will do this in a top-level component (could be `App.js` or a dedicated data loader component).
+
+For simplicity, we’ll handle it in `App.js` (or you could create a custom hook or separate context, but not necessary here).
+
+**Basic Auth Setup:**
+The API endpoint is `https://fedskillstest.coalitiontechnologies.workers.dev` and requires Basic Authentication. The credentials given are username `"coalition"` and password `"skills-test"`. We must **Base64 encode** these and include in the `Authorization` header. (Hard-coding the already encoded string is discouraged; instead, encode at runtime or store securely.)
+
+In JavaScript, you can Base64-encode using `btoa()` function. For example:
+
+```js
+const auth = btoa("coalition:skills-test");  // encodes to "Y29hbGl0aW9uOnNraWxscy10ZXN0"
+```
+
+Then include in fetch headers as `Authorization: Basic <encoded>`.
+
+**Data Fetch with useEffect:**
+In `App.js`, import React’s `useEffect` and `useState` hooks. We’ll use state to store:
+
+* the list of patients (`patients`),
+* the currently selected patient (`selectedPatient`).
+
+Add this at the top of `App.js`:
+
+```jsx
+import React, { useEffect, useState } from 'react';
+```
+
+Inside the `App` component, initialize state:
+
+```jsx
+const [patients, setPatients] = useState([]);
+const [selectedPatient, setSelectedPatient] = useState(null);
+```
+
+Now use `useEffect` to fetch data when the component mounts:
+
+```jsx
+useEffect(() => {
+  // Define async function to fetch data
+  async function fetchPatientData() {
+    const credentials = btoa("coalition:skills-test");
+    try {
+      const response = await fetch("https://fedskillstest.coalitiontechnologies.workers.dev", {
+        headers: { "Authorization": `Basic ${credentials}` }
+      });
+      const data = await response.json();
+      setPatients(data);
+      // Filter or find Jessica Taylor's record:
+      const jessica = data.find(p => p.name === "Jessica Taylor");
+      setSelectedPatient(jessica);
+    } catch (error) {
+      console.error("Error fetching patient data:", error);
+    }
+  }
+  fetchPatientData();
+}, []);
+```
+
+This will call the API once on component load. We locate Jessica’s data in the returned array and store it in `selectedPatient`. (The API provides static test data for several patients; we only need Jessica’s info per requirements.)
+
+Now pass the data as props to our components:
+
+```jsx
+<div className="dashboard-container">
+  <PatientsSidebar 
+    patients={patients} 
+    selectedName={selectedPatient ? selectedPatient.name : ""} 
+  />
+  <main className="center-panel">
+    {selectedPatient && (
+      <>
+        <DiagnosisHistory diagnosisHistory={selectedPatient.diagnosis_history} />
+        <DiagnosticList diagnosticList={selectedPatient.diagnostic_list} />
+      </>
+    )}
+  </main>
+  {selectedPatient && (
+    <PatientDetails patient={selectedPatient} />
+  )}
+</div>
+```
+
+We render the center and right sections only after `selectedPatient` is available (this avoids trying to render before data is fetched). The sidebar always renders (it can handle an empty `patients` list initially).
+
+We pass:
+
+* `patients` list and `selectedName` to `PatientsSidebar` so it can display the list and know which name is highlighted.
+* `selectedPatient.diagnosis_history` to `DiagnosisHistory` (an array of monthly records).
+* `selectedPatient.diagnostic_list` to `DiagnosticList`.
+* The whole `selectedPatient` object to `PatientDetails` (which further passes to sub-components).
+
+**Handling Data Discrepancies:**
+The design mockup may not exactly match the API data. For example, the API might return more or fewer diagnoses or lab results than shown in the template. This is okay – the instructions note that some data might need to be adjusted to match the design and that not all differences will count against you. For instance, if Jessica’s `diagnostic_list` has 3 items but the design showed 4, it’s fine; just display what’s available. In our example code, we display whatever comes in the array (so our table will adjust to the length of `diagnostic_list`). The same goes for `lab_results`.
+
+At this point, our React components are all connected. When the app runs, it will fetch the data and populate the UI with Jessica Taylor’s info.
+
+## 11. Applying CSS and Theming
+
+We have already imported the provided CSS theme file which gives us base styles for typography and colors. To ensure the UI matches the Adobe XD design, verify the following:
+
+* **Typography:** The theme CSS defines classes for text styles (we used these like `.card-title-24pt`, `.inner-card-title-18pt`, etc.). By using these classes in our JSX, our fonts, sizes, and colors should match the design’s specs for those elements. For example, `.card-title-24pt` uses Manrope, weight 800, size 24px, color #072635 (dark navy) which should correspond to major headings in the design. Similarly `.body-secondary-info-14pt` is Manrope normal 14px, color #707070 (grey), used for secondary info text.
+* **Colors:** The theme variables (`--unnamed-color-...`) cover the palette from the design. We applied them to backgrounds, highlights, and icon colors where relevant. For example, active sidebar highlight uses `--activestate_bg_2` (light teal), and the orange text used for “Show All Information” uses `--unnamed-color-ff6200` (orange). Ensure you’ve used these variables rather than arbitrary colors to stay consistent.
+* **Layout and Spacing:** The CSS theme may not dictate layout, so we wrote custom CSS for flex containers, padding, margins, etc. Double-check spacing against the mockup:
+
+  * Sidebar width should allow full names to show.
+  * The center chart and vital cards should have appropriate gaps (in the design, likely some margin between the chart card and the vitals).
+  * The right panel’s patient card and lab results should have a little separation. Perhaps add `margin-top: 20px;` on `.lab-results-section` or the card to create space.
+  * The top navbar should be fixed or sticky if needed (the design likely assumes it at the top always).
+* **Images and Icons:** Ensure that any images (profile pictures) are accessible. If the app must work offline, you might consider downloading Jessica’s profile picture and including it in `public/` instead of linking to the URL. For simplicity, using the URL from API is fine if internet is available. If offline operation is crucial, replace `patient.profile_picture` with a local import (e.g., put an image file in `src/assets/jessica.png` and use `import jessicaPic from './assets/jessica.png';` then `<img src={jessicaPic} />`).
+
+  * The same goes for icons: our use of `react-icons` does not require internet (the icons are bundled via npm), so we’re good there.
+
+By now, the application structure and styling should closely mirror the Adobe XD design. All required elements are present: patient list, highlighted Jessica, her info, vitals, blood pressure graph with 6 months data, diagnoses, and lab results with icons.
+
+## 12. Testing the Application Locally
+
+Run `npm start` to launch the app in development mode. Verify the following on the page:
+
+* The **Navbar** shows “Patients” as active and other menu items visible. The profile name on the right is present.
+* The **Patients Sidebar** lists multiple patients (if the API returned them) and **Jessica Taylor** is highlighted. (No clicking needed, just a visual highlight.)
+* The **Diagnosis History** section appears with heading, the Blood Pressure card showing a line chart. The chart should plot systolic and diastolic values over the last 6 months. The latest systolic/diastolic readings are displayed with their labels (e.g., “Higher than Average”). The three vital cards show 78 bpm Heart Rate, 20 bpm Respiratory, 98.6°F Temperature with their status (these values should match Jessica’s latest record – likely they do).
+* The **Diagnostic List** section is present with a table of diagnoses. For Jessica, you should see entries like “Hypertension – Chronic high blood pressure – Under Observation”, “Type 2 Diabetes – … – Cured”, etc., as provided by the API or adjusted for design.
+* The **Patient Details** card shows Jessica’s photo, name, DOB (formatted as MM/DD/YYYY or as in design), gender, phone, emergency contact, and insurance. All these should match the JSON data (e.g., DOB August 23, 1996, phone (415) 555-1234, insurance Sunrise Health Assurance).
+* The **Lab Results** list shows items like “Blood Tests, CT Scans, Radiology Reports, X-Rays” – check that these match what the API gave (and they are listed with a download icon). Jessica’s API data likely includes these four items; if not, display whatever is there (the example snippet had at least “Blood Tests” and “CT Scans”, but multiple sources show four items, which we included for completeness).
+
+Try resizing the window to see if the layout is responsive. The flex layout should naturally shrink the sidebars if needed. If small-screen support is required, you might stack columns vertically (this could be a further enhancement – e.g., show sidebar as a top dropdown on mobile). For the scope of the test, it’s likely sufficient to ensure it looks correct on a typical desktop size.
+
+If something doesn’t look right, adjust the CSS accordingly (spacing, font application, etc.). Use your browser’s dev tools to inspect elements and make sure classes from the theme are applied.
+
+## 13. Write the README Documentation
+
+Finally, create a **README.md** file in the project root. This README should provide instructions and information to anyone who receives your project. Include the following sections:
+
+* **Project Overview:** Explain that this is a React single-page application for the Coalition Technologies Front-End Developer API Skills Test, recreating a patient dashboard interface for Jessica Taylor using an API. Mention key features (uses Chart.js for graph, data fetched from API, follows provided design closely).
+* **Prerequisites:** Note that Node.js is required to run.
+* **Installation:** Step-by-step on how to get the project running:
+
+  1. Unzip the project folder (if delivered as a zip).
+  2. Run `npm install` to install dependencies.
+  3. Run `npm start` to launch the development server.
+  4. Open the local URL (usually [http://localhost:3000](http://localhost:3000)) in a browser.
+* **Usage:** Explain what should be seen on the page and any interactions (in our case, it’s mostly static display. We can mention that the patient list selection is not interactive in this version, since only Jessica’s data is in scope).
+* **Testing/Verification:** Instruct how to verify that everything is working (e.g., check that data is displayed for Jessica, the chart appears, etc.). If you have written any unit tests or if manual testing is expected, mention how to run `npm test` (though in this project we did not create tests).
+* **Technologies and Libraries:** List the main technologies (React, Chart.js, react-icons) and mention the CSS theme provided. If relevant, note that you used the `btoa` method for Basic Auth encoding (so credentials are not stored in plain text).
+* **Notes:** Mention any assumptions or choices. For example, “Only Jessica Taylor’s information is displayed as per instructions. The design data was matched as closely as possible; minor discrepancies in data (e.g., different number of lab results) are accepted. The Basic Auth is encoded at runtime rather than hard-coded.”
+* **Offline Use:** Since the app is meant to run offline (aside from the API call), clarify that all resources (CSS, icons, etc.) are included. The API call does require internet connectivity; if truly offline use is needed, one could mock the API response by including Jessica’s data locally.
+
+Your README should be clear and instructive so that even someone without context can set up and run your project easily. This also shows the testers that you can document your work thoroughly.
+
+## 14. Final Review
+
+Go through the app one more time with a fresh eye:
+
+* Compare the UI to the Adobe XD/screenshots provided. Ensure the layout (spacing, alignments) and style (colors, typography) match. All text content for Jessica Taylor should appear exactly as in the mockup (names, values). The chart should roughly match the example trend (if the API data differs, it’s fine – it’s more about having the chart present and labeled correctly).
+* Remove any development-only logs or comments from your code.
+* Ensure there are no errors in the console.
+
+Once satisfied, you can build the app for production (`npm run build`) and zip the build or the entire project as needed. Since the test expects a “zipped single-page local React project”, you likely need to zip the source code (so the evaluator can run it). Include the README in the zip.
+
+---
+
+By following this guide, a developer with basic React knowledge should be able to recreate the Coalition Technologies FED API Skills Test project step by step. We covered setting up the project, creating the required components, integrating the API data and Chart.js, applying the given CSS theme, and preparing documentation. Good luck, and happy coding!
+
+**References:** The instructions and design cues were based on the official skills test prompt and template. Key requirements such as using only Jessica Taylor’s data and ensuring proper Basic Auth usage were taken from the test description. The data structure for the patient (fields like name, diagnosis\_history, etc.) comes from the Coalition Technologies Patient Data API. Design element details (text, labels, statuses) were cross-referenced from a sample implementation of the Tech.Care dashboard to ensure accuracy in content. The CSS theme file provided the style guidelines for typography and color variables, which we have applied throughout the components. All these helped ensure our implementation aligns closely with the expected outcome of the skills test.
