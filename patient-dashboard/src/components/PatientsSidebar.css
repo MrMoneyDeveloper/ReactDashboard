@@ -1,7 +1,8 @@
 .patients-sidebar {
-  width: 200px;
   border-right: 1px solid #eee;
   padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
 }
 
 .patient-list {

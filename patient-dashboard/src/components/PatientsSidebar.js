@@ -7,7 +7,7 @@ function PatientsSidebar({ patients, selectedName }) {
       <ul className="patient-list">
         {patients.map(p => (
           <li
-            key={p.id}
+            key={p.id || p.name}
             className={`patient-item ${p.name === selectedName ? 'active' : ''}`}
           >
             {p.profile_picture && (
