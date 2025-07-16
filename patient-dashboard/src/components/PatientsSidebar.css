@@ -1,0 +1,19 @@
+.patients-sidebar {
+  width: 200px;
+  border-right: 1px solid #eee;
+  padding: 20px;
+}
+.patient-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.patient-item {
+  padding: 8px 0;
+  cursor: pointer;
+}
+.patient-item.active {
+  background: #d8fcf7;
+  border-left: 4px solid #01f0d0;
+  padding-left: 4px;
+}
