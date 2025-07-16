@@ -1,0 +1,48 @@
+body {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    background-color: #f5f5f5;
+}
+
+#dashboard-container {
+    height: calc(100vh - 50px);
+}
+
+#main-content {
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+.topbar {
+    height: 50px;
+    border-bottom: 1px solid #dee2e6;
+    color: #000;
+}
+
+#sidebar {
+    width: 250px;
+    border-right: 1px solid #ccc;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+#sidebar .list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+    font-weight: 500;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.vital-item {
+    min-width: 100px;
+}
+
+.card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+}
