@@ -5,6 +5,9 @@ import PatientsSidebar from './components/PatientsSidebar';
 import DiagnosisHistory from './components/DiagnosisHistory';
 import DiagnosticList from './components/DiagnosticList';
 import PatientDetails from './components/PatientDetails';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 function App() {
   const [patients, setPatients] = useState([]);
@@ -31,18 +34,27 @@ function App() {
   return (
     <div className="app-wrapper">
       <Navbar />
-      <div className="main">
-        <PatientsSidebar patients={patients} selectedName={selectedPatient ? selectedPatient.name : ''} />
-        <main className="center-panel">
-          {selectedPatient && (
-            <>
-              <DiagnosisHistory diagnosisHistory={selectedPatient.diagnosis_history} />
-              <DiagnosticList diagnosticList={selectedPatient.diagnostic_list} />
-            </>
-          )}
-        </main>
-        {selectedPatient && <PatientDetails patient={selectedPatient} />}
-      </div>
+      <Container fluid>
+        <Row>
+          <Col xs={12} lg={3}>
+            <PatientsSidebar
+              patients={patients}
+              selectedName={selectedPatient ? selectedPatient.name : ''}
+            />
+          </Col>
+          <Col xs={12} lg={6} className="center-panel">
+            {selectedPatient && (
+              <>
+                <DiagnosisHistory diagnosisHistory={selectedPatient.diagnosis_history} />
+                <DiagnosticList diagnosticList={selectedPatient.diagnostic_list} />
+              </>
+            )}
+          </Col>
+          <Col xs={12} lg={3}>
+            {selectedPatient && <PatientDetails patient={selectedPatient} />}
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 }

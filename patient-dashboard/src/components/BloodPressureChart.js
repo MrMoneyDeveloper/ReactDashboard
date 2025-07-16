@@ -30,6 +30,7 @@ function BloodPressureChart({ labels, systolicData, diastolicData }) {
       },
       options: {
         plugins: { legend: false },
+        maintainAspectRatio: false,
         scales: {
           y: { beginAtZero: false, suggestedMin: 60, suggestedMax: 170 },
         },
@@ -38,7 +39,11 @@ function BloodPressureChart({ labels, systolicData, diastolicData }) {
     return () => chart.destroy();
   }, [labels, systolicData, diastolicData]);
 
-  return <canvas ref={canvasRef} width={400} height={200}></canvas>;
+  return (
+    <div className="w-100" style={{ height: '300px' }}>
+      <canvas ref={canvasRef}></canvas>
+    </div>
+  );
 }
 
 export default BloodPressureChart;
