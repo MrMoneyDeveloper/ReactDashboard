@@ -3,17 +3,33 @@
   border-right: 1px solid #eee;
   padding: 20px;
 }
+
 .patient-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
+
 .patient-item {
+  display: flex;
+  align-items: center;
   padding: 8px 0;
   cursor: pointer;
 }
+
+.patient-item img.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
 .patient-item.active {
   background: #d8fcf7;
   border-left: 4px solid #01f0d0;
   padding-left: 4px;
+}
+
+.patient-item:hover {
+  background: var(--unnamed-color-ededed, #ededed);
 }

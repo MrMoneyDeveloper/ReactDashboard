@@ -8,3 +8,8 @@
   display: flex;
   flex: 1;
 }
+
+.center-panel {
+  flex: 1;
+  overflow-y: auto;
+}

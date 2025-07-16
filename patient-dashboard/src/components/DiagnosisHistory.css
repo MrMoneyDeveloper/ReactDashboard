@@ -1,0 +1,41 @@
+.diagnosis-history-section {
+  padding: 20px;
+}
+
+.blood-pressure-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.blood-pressure-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.blood-pressure-readings {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid var(--unnamed-color-ededed, #ededed);
+  margin-top: 10px;
+}
+
+.reading {
+  text-align: center;
+}
+
+.vitals-cards {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.vital-card {
+  flex: 1;
+  background: var(--unnamed-color-f6f6f6, #f6f6f6);
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+}

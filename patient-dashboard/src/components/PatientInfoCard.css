@@ -1,3 +1,43 @@
-.patient-info {
-  padding: 20px;
+.patient-info-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.patient-info-card .patient-photo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.patient-info-card .patient-photo img {
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.patient-info-card h2 {
+  margin: 0 0 10px;
+}
+
+.info-field {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.info-field .info-icon {
+  margin-right: 8px;
+  color: var(--unnamed-color-055a92, #055a92);
+}
+
+.info-field span {
+  margin-right: 5px;
+}
+
+.show-more {
+  color: var(--unnamed-color-ff6200, #ff6200);
+  cursor: pointer;
+  margin-top: 8px;
 }

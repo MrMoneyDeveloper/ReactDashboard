@@ -1,0 +1,23 @@
+.lab-results-section {
+  padding: 20px;
+}
+
+.lab-results-list {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 0;
+}
+
+.lab-results-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+}
+
+.download-icon {
+  color: var(--unnamed-color-007bc7, #007bc7);
+}

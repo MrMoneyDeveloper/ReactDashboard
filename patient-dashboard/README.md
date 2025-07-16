@@ -1,10 +1,6 @@
 # Patient Dashboard
 
-This is a simple React single page application that demonstrates a patient dashboard interface for the Coalition Technologies Front-End Developer skills test.
-
-## Project Overview
-
-The application shows a list of patients in a sidebar and basic information for the selected patient. It uses React and includes minimal styling. The project was bootstrapped with Create React App.
+This React single page application replicates the Coalition Technologies patient dashboard. It fetches patient data from the test API and displays Jessica Taylor's information including a blood pressure chart, vitals, diagnostic list and lab results.
 
 ## Prerequisites
 
@@ -25,11 +21,11 @@ The application shows a list of patients in a sidebar and basic information for 
 
 ## Usage
 
-The page displays a navbar at the top, a list of patients on the left, and details for **Jessica Taylor** on the right.
+The page shows a top navbar, a patient list sidebar, a center panel with diagnosis history and diagnostic list, and a right sidebar with patient details and lab results. The data is fetched from the provided API using Basic Auth.
 
 ## Testing
 
-Run the default test suite with:
+Run the test suite with:
 
 ```bash
 npm test -- --watchAll=false
@@ -39,8 +35,8 @@ npm test -- --watchAll=false
 
 - React
 - React Icons
-- Chart.js (not yet integrated in this minimal demo)
+- Chart.js
 
 ## Notes
 
-This is a partial implementation based on the provided plan. Only static sample data is used and most advanced features are omitted.
+Only Jessica Taylor's data is displayed. Credentials for the API are encoded at runtime using `btoa`.
